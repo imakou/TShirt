@@ -80,17 +80,6 @@ function getBase64(img, callback) {
   reader.readAsDataURL(img);
 }
 
-function beforeUpload(file) {
-  const isJPG = file.type === "image/jpeg";
-  if (!isJPG) {
-    message.error("You can only upload JPG file!");
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2;
-  if (!isLt2M) {
-    message.error("Image must smaller than 2MB!");
-  }
-  return isJPG && isLt2M;
-}
 class DesignBar extends Component {
   state = {
     prodType: "T-Shirt",
@@ -100,27 +89,25 @@ class DesignBar extends Component {
     loading: false
   };
   handleUpload = info => {
-    console.log("Hello info", info); // log is here
-    // if (info.file.status === "uploading") {
-    //   this.setState({ loading: true });
-    //   return;
-    // }
-    // if (info.file.status === "done") {
-    // Get this url from response in real world.
-    getBase64(info.fileList[0].originFileObj, imageUrl => {
-      console.log("Hello imageUrl", imageUrl); // log is here
-      this.setState({
-        imageUrl,
-        loading: false
-      });
+    getBase64(info.fileList[info.fileList.length - 1].originFileObj, imageUrl => {
+      this.setState(
+        {
+          imageUrl,
+          loading: false
+        },
+        this.props.setLogo(imageUrl)
+      );
     });
     // }
   };
-  handleText = name => event => {
-    console.log("Hello name", name); // log is here
-    this.setState({
-      [name]: event.target.value
-    });
+  handleText = event => {
+    const text = event.target.value;
+    this.setState(
+      {
+        text
+      },
+      this.props.setText(text)
+    );
   };
   handleChange = event => {
     console.log("Hello event.target.name", event); // log is here
@@ -131,7 +118,7 @@ class DesignBar extends Component {
     const item = pMap.get(this.state.prodType);
     const Options = [];
     Options.push(
-      <FormControl className="w-75 mb-4 ml-3">
+      <FormControl key="Product" className="w-75 mb-4 ml-3">
         <InputLabel htmlFor="materials">Product</InputLabel>
         <Select
           value={this.state.prodType}
@@ -156,7 +143,7 @@ class DesignBar extends Component {
         </MenuItem>
       ));
       Options.push(
-        <FormControl className="w-75 mb-4 ml-3">
+        <FormControl key="Materials" className="w-75 mb-4 ml-3">
           <InputLabel htmlFor="materials">Materials</InputLabel>
           <Select
             value={this.state.materials}
@@ -178,7 +165,7 @@ class DesignBar extends Component {
         </MenuItem>
       ));
       Options.push(
-        <FormControl className="w-75 mb-4 ml-3">
+        <FormControl key="Colors" className="w-75 mb-4 ml-3">
           <InputLabel htmlFor="colors">Colors</InputLabel>
           <Select
             value={this.state.color}
@@ -194,14 +181,14 @@ class DesignBar extends Component {
       );
     }
     Options.push(
-      <React.Fragment>
+      <React.Fragment key="Text">
         <Divider className="mb-0">Make it Cooler</Divider>
         <FormControl className="w-75 mb-4 ml-3">
           <TextField
             id="standard-name"
             label="Text"
             value={this.state.text}
-            onChange={this.handleText("text")}
+            onChange={this.handleText}
             margin="normal"
           />
         </FormControl>
@@ -215,7 +202,7 @@ class DesignBar extends Component {
       </div>
     );
     Options.push(
-      <React.Fragment>
+      <React.Fragment key="avatar">
         <Upload
           name="avatar"
           listType="picture-card"
@@ -225,7 +212,7 @@ class DesignBar extends Component {
           beforeUpload={() => false}
           onChange={this.handleUpload}
         >
-          {imageUrl ? <img src={imageUrl} alt="avatar" /> : uploadButton}
+          {imageUrl ? <img className="img-fluid" src={imageUrl} alt="avatar" /> : uploadButton}
         </Upload>
       </React.Fragment>
     );

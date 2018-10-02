@@ -1,34 +1,89 @@
 import React, { Component } from "react";
-import Konva from "konva";
-import { Stage, Layer, Image, Text } from "react-konva";
+import { Stage, Layer, Image } from "react-konva";
 import "./App.css";
 import DesignBar from "./Components/DesignBar";
-import Product from "./images/ts-w.png";
 import TransformerComponent from "./Components/TransformerComponent";
+import LogoDisplaying from "./Components/LogoDisplaying";
+import TextDisplaying from "./Components/TextDisplaying";
+
 class App extends Component {
   state = {
     prodSrc: undefined,
+    prodType: "T-Shirt",
     imgSrc: undefined,
-    Text: undefined,
-    selectedShapeName: undefined
+    text: undefined,
+    addPrice: 0,
+    material: undefined,
+    textColor: "black",
+    prodColor: undefined,
+    basePrice: 0,
+    logoEffects: "default",
+    selectedShapeName: undefined,
+    base64File: undefined
   };
 
   componentDidMount() {
+    this.setProdMainImg("/ts-w.png");
+    this.renderProduct();
+  }
+
+  setProdSrc = prodUrl => {
+    this.setProdMainImg(prodUrl);
+  };
+  setProdMainImg = imgSrc => {
     const prodSrc = new window.Image();
-    prodSrc.src = Product;
+    prodSrc.src = require(`./images${imgSrc}`);
     prodSrc.onload = () => {
-      // setState will redraw layer
-      // because "image" property is changed
       this.setState({
         prodSrc
       });
     };
-    this.renderProduct();
-  }
-
-  setText = Text => {
+  };
+  setText = text => {
     this.setState({
-      Text
+      text
+    });
+  };
+
+  setMaterial = (prodMaterial, addPrice) => {
+    this.setState({
+      prodMaterial,
+      addPrice
+    });
+  };
+
+  setColor = (prodColor, basePrice) => {
+    this.setState({
+      prodColor,
+      basePrice
+    });
+  };
+
+  setProdType = prodType => {
+    const defaultPic = {
+      "T-Shirt": "/ts-w.png",
+      Sweater: "/st-w.png"
+    };
+    this.setState(
+      {
+        prodType
+      },
+      () => {
+        this.setProdMainImg(defaultPic[prodType]);
+      }
+    );
+  };
+
+  setLogoEffects = logoEffects => {
+    this.setState({
+      logoEffects,
+      ...(logoEffects === "noImg" && { imgSrc: "", logoEffects: "default" })
+    });
+  };
+
+  setTextColor = textColor => {
+    this.setState({
+      textColor
     });
   };
 
@@ -37,60 +92,37 @@ class App extends Component {
       imgSrc
     });
   };
-
-  setProduct = value => {
-    console.log("Hello value", value);
+  handleExportClick = () => {
+    const base64File = this.stageRef.getStage().toDataURL();
+    this.setState({
+      base64File
+    });
   };
-
-  renderProduct = prod => {
+  renderProduct = () => {
     return <Image className="img-fluid" draggable image={this.state.prodSrc} />;
   };
-
-  renderLogo = () => {
-    const image = new window.Image();
-    image.src = this.state.imgSrc;
-    image.onload = () => {
-      this.myImage.cache();
-      this.myImage.getLayer().draw();
-    };
-    return (
-      <Image
-        filters={[Konva.Filters.Grayscale]}
-        ref={node => {
-          this.myImage = node;
-        }}
-        name={"Logo"}
-        onTransform={r => console.log(r)}
-        draggable
-        image={image}
-      />
-    );
+  calculatteSum = () => {
+    const { basePrice, addPrice, text, textColor, imgSrc } = this.state;
+    const price = basePrice + addPrice;
+    const txtFee = !text ? 0 : ["black", "white"].indexOf(textColor) !== -1 ? 0 : 3;
+    const logoFee = !imgSrc ? 0 : 10;
+    return price + txtFee + logoFee;
   };
-
-  renderText = () => {
-    const { Text: text } = this.state;
-    return <Text name={"Text"} onTransform={r => console.log(r)} draggable text={text} />;
-  };
-
   handleStageMouseDown = e => {
-    // clicked on stage - cler selection
     if (e.target === e.target.getStage()) {
       this.setState({
         selectedShapeName: ""
       });
       return;
     }
-    // clicked on transformer - do nothing
     const clickedOnTransformer = e.target.getParent().className === "Transformer";
     if (clickedOnTransformer) {
       return;
     }
 
-    // find clicked rect by its name
     const name = e.target.name();
-    const rect = "Logo";
-    // const rect = this.state.rectangles.find(r => r.name === name);
-    if (rect) {
+
+    if (name) {
       this.setState({
         selectedShapeName: name
       });
@@ -106,24 +138,50 @@ class App extends Component {
         <div className="container">
           <div className="row">
             <div className="col-md-8">
-              <Stage width="800" height="800" onMouseDown={this.handleStageMouseDown}>
-                <Layer>{this.renderProduct()}</Layer>
-                {this.state.imgSrc ? (
-                  <Layer>
-                    {this.renderLogo()}
-                    <TransformerComponent selectedShapeName={this.state.selectedShapeName} />
-                  </Layer>
-                ) : null}
-                {this.state.Text ? (
-                  <Layer>
-                    {this.renderText()}
-                    <TransformerComponent selectedShapeName={this.state.selectedShapeName} />
-                  </Layer>
-                ) : null}
+              <Stage
+                width={800}
+                height={800}
+                onMouseDown={this.handleStageMouseDown}
+                ref={node => {
+                  this.stageRef = node;
+                }}
+              >
+                <Layer>
+                  {this.renderProduct()}
+                  {this.state.imgSrc ? (
+                    <LogoDisplaying
+                      imgSrc={this.state.imgSrc}
+                      logoEffects={this.state.logoEffects}
+                    />
+                  ) : null}
+                  {this.state.text ? (
+                    <TextDisplaying
+                      text={this.state.text}
+                      textColor={this.state.textColor}
+                    />
+                  ) : null}
+
+                  <TransformerComponent
+                    selectedShapeName={this.state.selectedShapeName}
+                  />
+                </Layer>
               </Stage>
             </div>
             <div className="col-md-4">
-              <DesignBar setLogo={this.setLogo} setText={this.setText} setProduct={this.setProduct} />
+              <DesignBar
+                setProdType={this.setProdType}
+                setProdSrc={this.setProdSrc}
+                setLogo={this.setLogo}
+                setText={this.setText}
+                setColor={this.setColor}
+                setMaterial={this.setMaterial}
+                setTextColor={this.setTextColor}
+                setLogoEffects={this.setLogoEffects}
+                handleExportClick={this.handleExportClick}
+                calculatteSum={this.calculatteSum}
+                imageUrl={this.state.imageUrl}
+                base64File={this.state.base64File}
+              />
             </div>
           </div>
         </div>

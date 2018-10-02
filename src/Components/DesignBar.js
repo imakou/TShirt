@@ -6,7 +6,12 @@ import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
 import TextField from "@material-ui/core/TextField";
-import { Divider, Upload, Icon, message } from "antd";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import { Divider, Upload, Icon, Modal } from "antd";
+import Radio from "@material-ui/core/Radio";
+import Button from "@material-ui/core/Button";
+
 const data = [
   {
     prod_name: "T-Shirt",
@@ -23,7 +28,7 @@ const data = [
     colors: [
       {
         color: "White",
-        pic: "/ts-w.png",
+        pic: "st.png",
         price: 16.95
       },
       {
@@ -48,22 +53,22 @@ const data = [
     colors: [
       {
         color: "White",
-        pic: "/ts-w.png",
+        pic: "/st-w.png",
         price: 28.95
       },
       {
         color: "Black",
-        pic: "/ts-b.png",
+        pic: "/st-b.png",
         price: 28.95
       },
       {
         color: "Pink",
-        pic: "/ts-pl.png",
+        pic: "/st-pl.png",
         price: 32.95
       },
       {
         color: "Yellow",
-        pic: "/ts-y.png",
+        pic: "/st-y.png",
         price: 32.95
       }
     ]
@@ -83,10 +88,13 @@ function getBase64(img, callback) {
 class DesignBar extends Component {
   state = {
     prodType: "T-Shirt",
-    materials: "",
-    color: "",
+    material: "Light Cotton",
+    color: "black",
     text: "",
-    loading: false
+    loading: false,
+    textColor: undefined,
+    logoEffects: undefined,
+    showExport: false
   };
   handleUpload = info => {
     getBase64(info.fileList[info.fileList.length - 1].originFileObj, imageUrl => {
@@ -109,10 +117,43 @@ class DesignBar extends Component {
       this.props.setText(text)
     );
   };
-  handleChange = event => {
-    console.log("Hello event.target.name", event); // log is here
-    console.log("Hello event.target.value", event.target.value); // log is here
-    this.setState({ [event.target.name]: event.target.value });
+  handleChangeProdType = event => {
+    const prodType = event.target.value;
+    this.setState(
+      {
+        prodType
+      },
+      this.props.setProdType(prodType)
+    );
+  };
+  handleChangeMaterial = event => {
+    const material = event.target.value;
+    const item = pMap.get(this.state.prodType);
+    const prodAttr = item.materials.find(c => c.material_type === material);
+    const { material_type, fee } = prodAttr;
+    this.setState(
+      {
+        material
+      },
+      () => {
+        this.props.setMaterial(material_type, fee);
+      }
+    );
+  };
+  handleChangeColor = event => {
+    const color = event.target.value;
+    const item = pMap.get(this.state.prodType);
+    const prodAttr = item.colors.find(c => c.color === color);
+    const { pic, color: prodColor, price } = prodAttr;
+    this.setState(
+      {
+        color
+      },
+      () => {
+        this.props.setProdSrc(pic);
+        this.props.setColor(prodColor, price);
+      }
+    );
   };
   renderOptions = () => {
     const item = pMap.get(this.state.prodType);
@@ -122,7 +163,7 @@ class DesignBar extends Component {
         <InputLabel htmlFor="materials">Product</InputLabel>
         <Select
           value={this.state.prodType}
-          onChange={this.handleChange}
+          onChange={this.handleChangeProdType}
           inputProps={{
             name: "prodType",
             id: "materials-simple"
@@ -138,16 +179,16 @@ class DesignBar extends Component {
     );
     if ("materials" in item) {
       let content = item["materials"].map(m => (
-        <MenuItem key={m.material_type} value={m.fee}>
+        <MenuItem key={m.material_type} value={m.material_type}>
           {m.material_type}
         </MenuItem>
       ));
       Options.push(
         <FormControl key="Materials" className="w-75 mb-4 ml-3">
-          <InputLabel htmlFor="materials">Materials</InputLabel>
+          <InputLabel htmlFor="materials">Material</InputLabel>
           <Select
-            value={this.state.materials}
-            onChange={this.handleChange}
+            value={this.state.material}
+            onChange={this.handleChangeMaterial}
             inputProps={{
               name: "materials",
               id: "materials-simple"
@@ -169,7 +210,7 @@ class DesignBar extends Component {
           <InputLabel htmlFor="colors">Colors</InputLabel>
           <Select
             value={this.state.color}
-            onChange={this.handleChange}
+            onChange={this.handleChangeColor}
             inputProps={{
               name: "color",
               id: "colors-simple"
@@ -180,59 +221,166 @@ class DesignBar extends Component {
         </FormControl>
       );
     }
-    Options.push(
-      <React.Fragment key="Text">
-        <Divider className="mb-0">Make it Cooler</Divider>
-        <FormControl className="w-75 mb-4 ml-3">
-          <TextField
-            id="standard-name"
-            label="Text"
-            value={this.state.text}
-            onChange={this.handleText}
-            margin="normal"
-          />
-        </FormControl>
-      </React.Fragment>
-    );
-    const imageUrl = this.state.imageUrl;
-    const uploadButton = (
-      <div>
-        <Icon type={this.state.loading ? "loading" : "plus"} />
-        <div className="ant-upload-text">Upload</div>
-      </div>
-    );
-    Options.push(
-      <React.Fragment key="avatar">
-        <Upload
-          name="avatar"
-          listType="picture-card"
-          className="avatar-uploader"
-          showUploadList={false}
-          action="//jsonplaceholder.typicode.com/posts/"
-          beforeUpload={() => false}
-          onChange={this.handleUpload}
-        >
-          {imageUrl ? <img className="img-fluid" src={imageUrl} alt="avatar" /> : uploadButton}
-        </Upload>
-      </React.Fragment>
-    );
+
     return Options;
   };
-  render() {
-    console.log("Hello foo", pMap.get("T-Shirt")); // log is here
 
+  handleTextColorChange = event => {
+    const textColor = event.target.value;
+    this.setState({ textColor });
+    this.props.setTextColor(textColor);
+  };
+
+  handleLogoEffects = type => {
+    const logoEffects = type;
+    this.setState({ logoEffects, ...(type === "noImg" && { imageUrl: "" }) });
+    this.props.setLogoEffects(logoEffects);
+  };
+
+  handleExport = () => {
+    this.setState(
+      {
+        showExport: true
+      },
+      this.props.handleExportClick()
+    );
+  };
+  render() {
+    const { imageUrl } = this.state;
+    const buttonSettings = {
+      size: "small",
+      className: "mb-2",
+      variant: "contained",
+      style: { fontSize: 14 }
+    };
     return (
       <React.Fragment>
         <Paper className="p-4">
           <form className="d-flex flex-column" autoComplete="off">
             {this.renderOptions()}
+            {/* Optional func*/}
+            <Divider className="mb-0">Text</Divider>
+            <FormControl className="w-75 ml-3">
+              <TextField
+                label="Typing something..."
+                className="mb-2"
+                value={this.state.text}
+                onChange={this.handleText}
+              />
+              <RadioGroup
+                aria-label="TextColor"
+                name="textColor"
+                value={this.state.textColor}
+                onChange={this.handleTextColorChange}
+              >
+                <FormControlLabel value="black" control={<Radio />} label="Black" />
+                <FormControlLabel value="white" control={<Radio />} label="White" />
+                <FormControlLabel value="red" control={<Radio />} label="Red" />
+                <FormControlLabel value="green" control={<Radio />} label="Green" />
+                <FormControlLabel value="blue" control={<Radio />} label="Blue" />
+              </RadioGroup>
+            </FormControl>
+
+            <FormControl className="w-75 mb-4 ml-3">
+              <Divider className="mb-2">Logo</Divider>
+              <div className="d-flex flex-column justify-content-center">
+                <div className="d-flex justify-content-center">
+                  <Upload
+                    name="avatar"
+                    listType="picture-card"
+                    className="avatar-uploader align"
+                    showUploadList={false}
+                    beforeUpload={() => false}
+                    onChange={this.handleUpload}
+                  >
+                    {imageUrl ? (
+                      <img className="img-fluid" src={imageUrl} alt="avatar" />
+                    ) : (
+                      <div>
+                        <Icon type={this.state.loading ? "loading" : "plus"} />
+                        <div className="ant-upload-text">Upload</div>
+                      </div>
+                    )}
+                  </Upload>
+                </div>
+                <Button
+                  {...buttonSettings}
+                  onClick={() => this.handleLogoEffects("noImg")}
+                  variant="outlined"
+                  color="secondary"
+                >
+                  No Image
+                </Button>
+                <Button
+                  {...buttonSettings}
+                  onClick={() => this.handleLogoEffects("default")}
+                  color="default"
+                >
+                  Default
+                </Button>
+                <Button
+                  {...buttonSettings}
+                  onClick={() => this.handleLogoEffects("grayScale")}
+                  color="secondary"
+                >
+                  Grayscale
+                </Button>
+                <Button
+                  {...buttonSettings}
+                  onClick={() => this.handleLogoEffects("sepia")}
+                  color="primary"
+                >
+                  Sepia
+                </Button>
+              </div>
+            </FormControl>
+
+            <FormControl className="w-75 mb-4 ml-3">
+              <Divider className="mb-2">Export</Divider>
+              <div className="d-flex flex-column justify-content-center">
+                <Button
+                  {...buttonSettings}
+                  onClick={() => this.handleLogoEffects("noImg")}
+                  variant="outlined"
+                  color="secondary"
+                >
+                  $ {this.props.calculatteSum()}
+                </Button>
+                <Button {...buttonSettings} onClick={this.handleExport} color="default">
+                  Export T-shirt
+                </Button>
+              </div>
+            </FormControl>
           </form>
         </Paper>
+        <Modal
+          visible={this.state.showExport}
+          onOk={() => this.setState({ showExport: false })}
+          onCancel={() => this.setState({ showExport: false })}
+          footer={null}
+          width="900px"
+          bodyStyle={{ textAlign: "center" }}
+        >
+          <img src={this.props.base64File} alt="export" />
+        </Modal>
       </React.Fragment>
     );
   }
 }
 
-DesignBar.propTypes = {};
+DesignBar.propTypes = {
+  setProdType: PropTypes.func,
+  setProdSrc: PropTypes.func,
+  setLogo: PropTypes.func,
+  setText: PropTypes.func,
+  setColor: PropTypes.func,
+  setMaterial: PropTypes.func,
+  setTextColor: PropTypes.func,
+  setLogoEffects: PropTypes.func,
+  handleExportClick: PropTypes.func,
+  calculatteSum: PropTypes.func,
+  imageUrl: PropTypes.string,
+  base64File: PropTypes.string
+};
 
 export default DesignBar;

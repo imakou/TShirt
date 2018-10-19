@@ -322,7 +322,7 @@ class DesignBar extends Component {
                   Grayscale
                 </Button>
                 <Button {...buttonSettings} onClick={() => this.handleLogoEffects("sepia")} color="primary">
-                  Sepia
+                  Sepia...
                 </Button>
               </div>
             </FormControl>

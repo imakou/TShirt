@@ -311,11 +311,7 @@ class DesignBar extends Component {
                 >
                   No Image
                 </Button>
-                <Button
-                  {...buttonSettings}
-                  onClick={() => this.handleLogoEffects("default")}
-                  color="default"
-                >
+                <Button {...buttonSettings} onClick={() => this.handleLogoEffects("default")} color="default">
                   Default
                 </Button>
                 <Button
@@ -325,11 +321,7 @@ class DesignBar extends Component {
                 >
                   Grayscale
                 </Button>
-                <Button
-                  {...buttonSettings}
-                  onClick={() => this.handleLogoEffects("sepia")}
-                  color="primary"
-                >
+                <Button {...buttonSettings} onClick={() => this.handleLogoEffects("sepia")} color="primary">
                   Sepia
                 </Button>
               </div>
@@ -338,14 +330,6 @@ class DesignBar extends Component {
             <FormControl className="w-75 mb-4 ml-3">
               <Divider className="mb-2">Export</Divider>
               <div className="d-flex flex-column justify-content-center">
-                <Button
-                  {...buttonSettings}
-                  onClick={() => this.handleLogoEffects("noImg")}
-                  variant="outlined"
-                  color="secondary"
-                >
-                  $ {this.props.calculatteSum()}
-                </Button>
                 <Button {...buttonSettings} onClick={this.handleExport} color="default">
                   Export T-shirt
                 </Button>

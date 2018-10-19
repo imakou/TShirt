@@ -15,9 +15,6 @@ jobs:
       # - image: circleci/mongo:3.4.4
 
     working_directory: ~/repo
-    branches:
-      only:
-        - master
     steps:
       - checkout
 
@@ -36,6 +33,8 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
       - deploy:
           command: |
-            git config --global user.email $GH_EMAIL
-            git config --global user.name $GH_NAME
-            yarn run deploy
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              git config --global user.email $GH_EMAIL
+              git config --global user.name $GH_NAME
+              yarn run deploy
+            fi

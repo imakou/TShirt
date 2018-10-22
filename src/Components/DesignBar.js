@@ -262,7 +262,7 @@ class DesignBar extends Component {
             <Divider className="mb-0">Text</Divider>
             <FormControl className="w-75 ml-3">
               <TextField
-                label="Typing something..."
+                label="Typing something."
                 className="mb-2"
                 value={this.state.text}
                 onChange={this.handleText}

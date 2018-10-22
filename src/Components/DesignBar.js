@@ -256,7 +256,7 @@ class DesignBar extends Component {
     return (
       <React.Fragment>
         <Paper className="p-4">
-          <form className="d-flex flex-column" autoComplete="off">
+          <div className="d-flex flex-column" autoComplete="off">
             {this.renderOptions()}
             {/* Optional func*/}
             <Divider className="mb-0">Text</Divider>
@@ -335,7 +335,7 @@ class DesignBar extends Component {
                 </Button>
               </div>
             </FormControl>
-          </form>
+          </div>
         </Paper>
         <Modal
           visible={this.state.showExport}

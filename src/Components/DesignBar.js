@@ -28,7 +28,7 @@ const data = [
     colors: [
       {
         color: "White",
-        pic: "st.png",
+        pic: "/ts-w.png",
         price: 16.95
       },
       {

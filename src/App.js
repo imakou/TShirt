@@ -184,6 +184,13 @@ class App extends Component {
               />
             </div>
           </div>
+          <div className="row">
+            <div className="col-md-12 mt-2">
+              <a href="https://github.com/imakou/TShirt/tree/master" target="_blank">
+                © 2018 Allen Kou.
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     );

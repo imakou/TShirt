@@ -183,21 +183,6 @@ class DesignBar extends Component {
           {m.material_type}
         </MenuItem>
       ));
-      Options.push(
-        <FormControl key="Materials" className="w-75 mb-4 ml-3">
-          <InputLabel htmlFor="materials">Material</InputLabel>
-          <Select
-            value={this.state.material}
-            onChange={this.handleChangeMaterial}
-            inputProps={{
-              name: "materials",
-              id: "materials-simple"
-            }}
-          >
-            {content}
-          </Select>
-        </FormControl>
-      );
     }
     if ("colors" in item) {
       let content = item["colors"].map(m => (
@@ -259,13 +244,13 @@ class DesignBar extends Component {
           <div className="d-flex flex-column" autoComplete="off">
             {this.renderOptions()}
             {/* Optional func*/}
-            <Divider className="mb-0">Text</Divider>
             <FormControl className="w-75 ml-3">
               <TextField
-                label="Typing something."
+                label="Type text here"
                 className="mb-2"
                 value={this.state.text}
                 onChange={this.handleText}
+                multiline
               />
               <RadioGroup
                 aria-label="TextColor"
@@ -282,7 +267,6 @@ class DesignBar extends Component {
             </FormControl>
 
             <FormControl className="w-75 mb-4 ml-3">
-              <Divider className="mb-2">Logo</Divider>
               <div className="d-flex flex-column justify-content-center">
                 <div className="d-flex justify-content-center">
                   <Upload
@@ -298,7 +282,7 @@ class DesignBar extends Component {
                     ) : (
                       <div>
                         <Icon type={this.state.loading ? "loading" : "plus"} />
-                        <div className="ant-upload-text">Upload</div>
+                        <div className="ant-upload-text">Upload IMG</div>
                       </div>
                     )}
                   </Upload>
@@ -309,7 +293,7 @@ class DesignBar extends Component {
                   variant="outlined"
                   color="secondary"
                 >
-                  No Image
+                  Remove Image
                 </Button>
                 <Button {...buttonSettings} onClick={() => this.handleLogoEffects("default")} color="default">
                   Default
@@ -322,13 +306,12 @@ class DesignBar extends Component {
                   Grayscale
                 </Button>
                 <Button {...buttonSettings} onClick={() => this.handleLogoEffects("sepia")} color="primary">
-                  Sepia...
+                  Sepia
                 </Button>
               </div>
             </FormControl>
 
             <FormControl className="w-75 mb-4 ml-3">
-              <Divider className="mb-2">Export</Divider>
               <div className="d-flex flex-column justify-content-center">
                 <Button {...buttonSettings} onClick={this.handleExport} color="default">
                   Export T-shirt
